@@ -6,9 +6,11 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
 
 import javax.swing.JFrame;
 
+import game.main.graphics.Window;
 import game.main.input.Keyboard;
 import game.main.input.Mouse;
 
@@ -28,8 +30,11 @@ public class Game extends Canvas implements Runnable { //making a class
 	//creating Java Components
 	private JFrame frame; //This is the "frame", or the "window" of the screen
 	private Thread thread; //This is a process.
-	private BufferedImage image; //This is an image that we'll be drawing onto the JFrame!
+	private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB); //This is an image that we'll be drawing onto the JFrame!
+	private int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData(); //this is the array of pixels that will be shown on the screen
 	
+	//custom class components
+	private Window window;
 	private Keyboard keyboard; //This is a keyboard (CTRL + Click "Keyboard" for reference)
 	private Mouse mouse; //This is a mouse (CTRL + Click "Mouse" for reference)
 	
@@ -44,6 +49,9 @@ public class Game extends Canvas implements Runnable { //making a class
 		frame.setPreferredSize(res);
 		frame.setMaximumSize(res);
 		frame.setResizable(false); //changing this later obviously
+		
+		//create window
+		window = new Window(WIDTH, HEIGHT);
 		
 		//init keyboard and mouse (again, go check the classes for reference)
 		keyboard = new Keyboard();
@@ -116,6 +124,11 @@ public class Game extends Canvas implements Runnable { //making a class
 		 * BufferStrategy is used to have images layed out back-to-back so that there is no lag. This way, when an image is loaded,
 		 * the next image is already up for preperation.
 		 */
+		
+		//set screen pixels to actual pixel array
+		window.render(); //calls the render method
+		for(int i = 0; i < pixels.length; i++) pixels[i] = window.pixels[i]; //sets stuff
+		
 		
 		Graphics g = bs.getDrawGraphics(); //graphics of the BufferStrategy
 		
