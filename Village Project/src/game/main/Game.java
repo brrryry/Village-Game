@@ -11,8 +11,10 @@ import java.awt.image.DataBufferInt;
 import javax.swing.JFrame;
 
 import game.main.graphics.Window;
+import game.main.graphics.sprite.Spritesheet;
 import game.main.input.Keyboard;
 import game.main.input.Mouse;
+import game.main.map.Map;
 
 public class Game extends Canvas implements Runnable { //making a class
 
@@ -35,6 +37,7 @@ public class Game extends Canvas implements Runnable { //making a class
 	
 	//custom class components
 	private Window window;
+	private Map map; //create a new map (current map that the player is on)
 	private Keyboard keyboard; //This is a keyboard (CTRL + Click "Keyboard" for reference)
 	private Mouse mouse; //This is a mouse (CTRL + Click "Mouse" for reference)
 	
@@ -43,6 +46,8 @@ public class Game extends Canvas implements Runnable { //making a class
 	public Game() { //constructor!
 		frame = new JFrame(TITLE); //init the JFrame
 		Dimension res = new Dimension(WIDTH * SCALE, HEIGHT * SCALE); //create a new Dimension named res to set screen size
+		
+		map = new Map();
 		
 		//setting screen size
 		frame.setMinimumSize(res);
@@ -125,19 +130,27 @@ public class Game extends Canvas implements Runnable { //making a class
 		 * the next image is already up for preperation.
 		 */
 		
+		window.clear();
+		
 		//set screen pixels to actual pixel array
-		window.render(); //calls the render method
+		window.render(map); //calls the render method
 		for(int i = 0; i < pixels.length; i++) pixels[i] = window.pixels[i]; //sets stuff
 		
 		
 		Graphics g = bs.getDrawGraphics(); //graphics of the BufferStrategy
 		
-		g.setColor(Color.black); //set the drawing color to black
+	
+		g.setColor(Color.blue); //set the drawing color to black
 		g.fillRect(0, 0, WIDTH * SCALE, HEIGHT * SCALE); //BIG RECTANGLE BOIS
 		g.drawImage(image, 0, 0, WIDTH * SCALE, HEIGHT * SCALE, null); //DRAW IMAGE BOIS (this draws the game)
 		
 		g.dispose(); //yeet graphics
 		bs.show(); //present the image to the screen
+		
+	}
+	
+	public void setMap(Map m) { //possibly setting a new map?
+		this.map = m; //this initializes the map to the new map that is being set
 	}
 	
 	public static void main(String[] args) { //main method
