@@ -114,8 +114,15 @@ public class Game extends Canvas implements Runnable { //making a class
 		stop();
 	}
 	
+	public int xOffset = 0;
+	public int yOffset = 0;
+	
 	public void update() { //update components (keybaord input, mouse input, etcetc)
 		keyboard.update(); //again, ctrl click for more info
+		if(keyboard.up) yOffset++;
+		if(keyboard.down) yOffset--;
+		if(keyboard.left) xOffset++;
+		if(keyboard.right) xOffset--;
 	}
 	
 	public void render() { //render componenets
@@ -133,6 +140,7 @@ public class Game extends Canvas implements Runnable { //making a class
 		window.clear();
 		
 		//set screen pixels to actual pixel array
+		window.setOffset(xOffset, yOffset);
 		window.render(map); //calls the render method
 		for(int i = 0; i < pixels.length; i++) pixels[i] = window.pixels[i]; //sets stuff
 		

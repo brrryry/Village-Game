@@ -42,12 +42,22 @@ public class Window { //this class takes care of all the rendering and sets its 
 	}
 	
 	public void renderTile(int xpos, int ypos, Tile tile) {
-		for(int y = ypos; y < ypos + 16; y++) {
-			for(int x = xpos; x < xpos + 16; x++) {
-				if(y < 0 || y >= height || x < 0 || x >= width) break;
-				pixels[xpos + ypos * width] = tile.tileSprite.pixels[(x - xpos) + (y - ypos) * 16];
+		xpos += xOffset; //set the offset of the map
+		ypos += yOffset; //set the offset of the map
+		for(int y = 0; y < 16; y++) {
+			for(int x = 0; x < 16; x++) {
+				int yy = y + ypos;
+				int xx = x + xpos;
+				if(yy < 0 || yy >= height || xx < 0 || xx >= width) continue;
+				pixels[(xpos + x) + (y + ypos) * width] = tile.tileSprite.pixels[x + y * 16];
 			} 
 		}
 	}
+	
+	public void setOffset(int x, int y) {
+		this.xOffset = x;
+		this.yOffset = y;
+	}
+	
 
 }
