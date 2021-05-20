@@ -9,6 +9,8 @@ public class Sprite {
 	
 	//Random Color Sprites
 	public static Sprite dirt1 = new Sprite(0, 0, 16, Spritesheet.tiles1);
+	public static Sprite debug1 = new Sprite(1, 0, 16, Spritesheet.tiles1);
+	public static Sprite testPlayer = new Sprite(2, 0, 16, Spritesheet.tiles1);
 	
 	public Sprite(int x, int y, int size, Spritesheet sheet) {
 		pixels = new int[size * size];

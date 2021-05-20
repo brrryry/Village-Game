@@ -8,7 +8,7 @@ import game.main.tile.Tile;
 
 public class Map {
 
-	public static final int MAPSIZE = 128; //typical size of map in tiles
+	public static final int MAPSIZE = 64; //typical size of map in tiles
 	
 	public Tile[][] mapTiles = new Tile[MAPSIZE][MAPSIZE];
 	
@@ -25,7 +25,9 @@ public class Map {
 		
 		for(int y = 0; y < mapTiles.length; y++) {
 			for(int x = 0; x < mapTiles[0].length; x++) {
-				mapTiles[y][x] = Tile.dirtTile;
+				int choice = random.nextInt(10);
+				if (choice == 0) mapTiles[y][x] = Tile.debugTile;
+				else mapTiles[y][x] = Tile.dirtTile;
 			}
 		}
 		
