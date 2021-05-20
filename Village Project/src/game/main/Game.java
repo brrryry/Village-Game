@@ -7,11 +7,15 @@ import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.io.IOException;
+import java.net.URLClassLoader;
 
+import javax.print.DocFlavor.URL;
 import javax.swing.JFrame;
 
+import game.main.entity.mob.Player;
 import game.main.graphics.Window;
-import game.main.graphics.sprite.Spritesheet;
+import game.main.graphics.sprite.Sprite;
 import game.main.input.Keyboard;
 import game.main.input.Mouse;
 import game.main.map.Map;
@@ -40,6 +44,7 @@ public class Game extends Canvas implements Runnable { //making a class
 	private Map map; //create a new map (current map that the player is on)
 	private Keyboard keyboard; //This is a keyboard (CTRL + Click "Keyboard" for reference)
 	private Mouse mouse; //This is a mouse (CTRL + Click "Mouse" for reference)
+	private Player player;
 	
 	private boolean running = false; //This keeps track of whether the game is running or not
 	
@@ -61,6 +66,8 @@ public class Game extends Canvas implements Runnable { //making a class
 		//init keyboard and mouse (again, go check the classes for reference)
 		keyboard = new Keyboard();
 		mouse = new Mouse();
+		
+		player = new Player("Bryan", 0, 0, Sprite.testPlayer, map, keyboard);
 		
 		//adding the input components to the object (Game)
 		addKeyListener(keyboard);
@@ -84,45 +91,41 @@ public class Game extends Canvas implements Runnable { //making a class
 	}
 	
 	public void run() { //run loop (idek how I even came up with this so I copy/pasted it from a previous project)
-		long lastTime = System.nanoTime();
-		long timer = System.currentTimeMillis();
-		final double ns = 1000000000.0 / 60.0;
+		long lastTime = System.nanoTime(); //get current time in nanoseconds
+		long timer = System.currentTimeMillis(); //get current time in milliseconds
+		final double ns = 1000000000.0 / 60.0; //ns value
 		double delta = 0;
 		int frames = 0;
 		int updates = 0;
-		requestFocus();
-		while (running) {
-			long now = System.nanoTime();
-			delta += (now - lastTime) / ns;
-			lastTime = now;
-			while (delta >= 1) {
+		requestFocus(); //request focus on the jcomponent
+		while (running) { //while the game is running...
+			long now = System.nanoTime(); //get current time in nanoseconds
+			delta += (now - lastTime) / ns; //find the difference in time in "ns" units
+			lastTime = now; //set the last time to the current time
+			while (delta >= 1) { //while "ns" units of difference in time is greater than 1
 				update(); //update method
-				updates++;
-				delta--;
-			}
+				updates++; //add 1 to updates value
+				delta--; //subtract 1 from the difference
+			} 
 			render(); //render method
 			frames++;
 
-			if (System.currentTimeMillis() - timer > 1000) {
-				timer += 1000;
-				System.out.println(updates + " ups, " + frames + " fps");
+			if (System.currentTimeMillis() - timer > 1000) { //if it's been more than a second since the last second
+				timer += 1000; //add a second to the timer
+				System.out.println(updates + " ups, " + frames + " fps"); //updates and frames are now totaled to the amount of updates and renders per second
 				frame.setTitle(TITLE + "  |  " + updates + " ups, " + frames + " fps"); //sets the title of the window
-				updates = 0;
-				frames = 0;
+				updates = 0; //reset updates value
+				frames = 0; //reset frames value
 			}
 		}
-		stop();
+		stop(); //stop running lmao
 	}
 	
-	public int xOffset = 0;
-	public int yOffset = 0;
+
 	
 	public void update() { //update components (keybaord input, mouse input, etcetc)
-		keyboard.update(); //again, ctrl click for more info
-		if(keyboard.up) yOffset++;
-		if(keyboard.down) yOffset--;
-		if(keyboard.left) xOffset++;
-		if(keyboard.right) xOffset--;
+		keyboard.update();
+		player.update();
 	}
 	
 	public void render() { //render componenets
@@ -140,8 +143,9 @@ public class Game extends Canvas implements Runnable { //making a class
 		window.clear();
 		
 		//set screen pixels to actual pixel array
-		window.setOffset(xOffset, yOffset);
+		window.setOffset(player.getX() - window.width / 2, player.getY() - window.height / 2);
 		window.render(map); //calls the render method
+		window.renderPlayer(player);
 		for(int i = 0; i < pixels.length; i++) pixels[i] = window.pixels[i]; //sets stuff
 		
 		
@@ -161,7 +165,8 @@ public class Game extends Canvas implements Runnable { //making a class
 		this.map = m; //this initializes the map to the new map that is being set
 	}
 	
-	public static void main(String[] args) { //main method
+	public static void main(String[] args) throws IOException { //main method
+		
 		Game game = new Game(); //new object!
 		game.frame.setLocationRelativeTo(null); //center screen
 		game.frame.add(game); //add game component
@@ -169,6 +174,8 @@ public class Game extends Canvas implements Runnable { //making a class
 		game.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //sets the "x" button
 		game.frame.setVisible(true); //makes the frame, ya'know, VISIBLE
 		game.start(); //start method!
+		
+		
 	}
 	
 }
