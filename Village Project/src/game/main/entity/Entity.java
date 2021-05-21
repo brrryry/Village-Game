@@ -8,11 +8,12 @@ public class Entity {
 	private int x, y;
 	private boolean removed;
 	public Map map;
-	protected Sprite sprite;
+	public Sprite sprite;
 	
-	public Entity(int x, int y) {
+	public Entity(int x, int y, Sprite sprite) {
 		this.x = x;
 		this.y = y;
+		this.sprite = sprite;
 		removed = false;
 	}
 	

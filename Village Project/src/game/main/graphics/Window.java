@@ -22,7 +22,7 @@ public class Window { //this class takes care of all the rendering and sets its 
 	
 	
 	public void clear() { //clears the screen
-		for(int i = 0; i < pixels.length; i++) pixels[i] = 0x000000;
+		for(int i = 0; i < pixels.length; i++) pixels[i] = 0x5997CC;
 	}
 	
 	

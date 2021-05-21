@@ -33,6 +33,9 @@ public class Game extends Canvas implements Runnable { //making a class
 	public static final int HEIGHT = WIDTH * 9 / 16;
 	public static final int SCALE = 4;
 	
+	public static final int UPS = 60;
+	public static final int FPS = 120;
+	
 	//creating Java Components
 	private JFrame frame; //This is the "frame", or the "window" of the screen
 	private Thread thread; //This is a process.
@@ -90,36 +93,43 @@ public class Game extends Canvas implements Runnable { //making a class
 		}
 	}
 	
-	public void run() { //run loop (idek how I even came up with this so I copy/pasted it from a previous project)
-		long lastTime = System.nanoTime(); //get current time in nanoseconds
-		long timer = System.currentTimeMillis(); //get current time in milliseconds
-		final double ns = 1000000000.0 / 60.0; //ns value
-		double delta = 0;
-		int frames = 0;
-		int updates = 0;
-		requestFocus(); //request focus on the jcomponent
-		while (running) { //while the game is running...
-			long now = System.nanoTime(); //get current time in nanoseconds
-			delta += (now - lastTime) / ns; //find the difference in time in "ns" units
-			lastTime = now; //set the last time to the current time
-			while (delta >= 1) { //while "ns" units of difference in time is greater than 1
-				update(); //update method
-				updates++; //add 1 to updates value
-				delta--; //subtract 1 from the difference
-			} 
-			render(); //render method
-			frames++;
+	public void run() {
 
-			if (System.currentTimeMillis() - timer > 1000) { //if it's been more than a second since the last second
-				timer += 1000; //add a second to the timer
-				System.out.println(updates + " ups, " + frames + " fps"); //updates and frames are now totaled to the amount of updates and renders per second
-				frame.setTitle(TITLE + "  |  " + updates + " ups, " + frames + " fps"); //sets the title of the window
-				updates = 0; //reset updates value
-				frames = 0; //reset frames value
-			}
+		long initialTime = System.nanoTime();
+		final double timeU = 1000000000 / UPS;
+		final double timeF = 1000000000 / FPS;
+		double deltaU = 0, deltaF = 0;
+		int frames = 0, ticks = 0;
+		long timer = System.currentTimeMillis();
+
+		    while (running) {
+
+		        long currentTime = System.nanoTime();
+		        deltaU += (currentTime - initialTime) / timeU;
+		        deltaF += (currentTime - initialTime) / timeF;
+		        initialTime = currentTime;
+
+		        if (deltaU >= 1) {
+		            update();
+		            ticks++;
+		            deltaU--;
+		        }
+
+		        if (deltaF >= 1) {
+		            render();
+		            frames++;
+		            deltaF--;
+		        }
+
+		        if (System.currentTimeMillis() - timer > 1000) {
+		            frame.setTitle(TITLE + " | " + String.format("UPS: %s, FPS: %s", ticks, frames));
+		       
+		            frames = 0;
+		            ticks = 0;
+		            timer += 1000;
+		        }
+		    }
 		}
-		stop(); //stop running lmao
-	}
 	
 
 	

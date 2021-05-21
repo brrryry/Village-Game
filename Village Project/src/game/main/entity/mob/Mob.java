@@ -1,6 +1,9 @@
 package game.main.entity.mob;
 
+import java.util.Objects;
+
 import game.main.entity.Entity;
+import game.main.graphics.sprite.Sprite;
 import game.main.map.Map;
 
 public abstract class Mob extends Entity {
@@ -27,15 +30,16 @@ public abstract class Mob extends Entity {
 		if(ymove > 0) mobdir = Direction.UP;
 		if(ymove < 0) mobdir = Direction.DOWN;
 		
+		if(collision(xmove, ymove)) return;
 		if(!collision(xmove, ymove)) {
 			this.x += xmove;
 			this.y += ymove;
 		}
 		
-		if(x < 0) x = 0;
-		if(y < 0) y = 0;
-		if(x > (Map.MAPSIZE - 1) * 16) x = (Map.MAPSIZE - 1) * 16;
-		if(y > (Map.MAPSIZE - 1) * 16) y = (Map.MAPSIZE - 1) * 16;
+		if(x < (this.sprite.getBound() * -1)) x = this.sprite.getBound() * -1 - 1;
+		if(y < (this.sprite.getBound() * -1)) y = this.sprite.getBound() * -1 - 1;
+		if(x + 16 - this.sprite.getBound() >= Map.MAPSIZE * 16) x = Map.MAPSIZE * 16 - 15 + this.sprite.getBound();
+		if(y + 16 - this.sprite.getBound() >= Map.MAPSIZE * 16) y = Map.MAPSIZE * 16 - 15 + this.sprite.getBound();
 	}
 	
 	public int abs(int value) {
@@ -45,15 +49,17 @@ public abstract class Mob extends Entity {
 	
 	public boolean collision(int xmove, int ymove) {
 		
-		int leftbound = x + 4;
-		int rightbound = x + 13;
-		int upbound = y + 4;
-		int downbound = y + 13;
+		int leftbound = x + this.sprite.getBound();
+		int rightbound = x + 16 - this.sprite.getBound();
+		int upbound = y + this.sprite.getBound();
+		int downbound = y + 16 - this.sprite.getBound();
 		
-		if(xmove < 0 && (map.mapTiles[leftbound / 16][y / 16].solid() || map.mapTiles[leftbound / 16][upbound / 16].solid() || map.mapTiles[leftbound / 16][downbound / 16].solid())) return true;
-		if(xmove > 0 && (map.mapTiles[rightbound / 16][y / 16].solid() || map.mapTiles[rightbound / 16][upbound / 16].solid() || map.mapTiles[rightbound / 16][downbound / 16].solid())) return true;
-		if(ymove < 0 && (map.mapTiles[x / 16][upbound / 16].solid() || map.mapTiles[leftbound / 16][upbound / 16].solid() || map.mapTiles[rightbound / 16][upbound / 16].solid())) return true;
-		if(ymove > 0 && (map.mapTiles[x / 16][downbound / 16].solid() || map.mapTiles[leftbound / 16][downbound / 16].solid() || map.mapTiles[rightbound / 16][downbound / 16].solid())) return true;
+		for(int pixelnum = this.sprite.getBound() + 1; pixelnum < 15 - this.sprite.getBound(); pixelnum++) {
+			if(xmove < 0 && (leftbound / 16 < 0 || map.mapTiles[leftbound / 16][(y + pixelnum) / 16].solid())) return true;
+			if(xmove > 0 && (rightbound / 16 >= Map.MAPSIZE || map.mapTiles[rightbound / 16][(y + pixelnum) / 16].solid())) return true;
+			if(ymove < 0 && (upbound / 16 < 0 || map.mapTiles[(x + pixelnum ) / 16][upbound / 16].solid())) return true;
+			if(ymove > 0 && (downbound / 16 >= Map.MAPSIZE || map.mapTiles[(x + pixelnum) / 16][downbound / 16].solid())) return true;
+		}
 		
 		return false;
 	}

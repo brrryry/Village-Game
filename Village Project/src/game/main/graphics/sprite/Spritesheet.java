@@ -14,7 +14,7 @@ public class Spritesheet {
 	public int[] pixels;
 	
 
-	public static Spritesheet tiles1 = new Spritesheet("./res/Sprites/tiles/tiles1.png", 256, 256);
+	public static Spritesheet tiles1 = new Spritesheet("/Sprites/tiles/tiles1.png", 256, 256);
 	
 	public Spritesheet(String filepath, int width, int height) {
 		this.filepath = filepath;
@@ -28,7 +28,7 @@ public class Spritesheet {
 		try {
 			Path testpath = Paths.get(filepath);
 			System.out.println(testpath.toAbsolutePath());
-			BufferedImage image = ImageIO.read(new File(filepath)); //get bufferedimage
+			BufferedImage image = ImageIO.read(getClass().getResource(filepath)); //get bufferedimage
 			System.out.println("Loading Spritesheet at " + filepath + " successfully");
 			width = image.getWidth(); //set the width
 			height = image.getHeight(); //set the height

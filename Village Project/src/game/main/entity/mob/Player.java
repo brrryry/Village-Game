@@ -10,7 +10,6 @@ public class Player extends Mob {
 	
 	private String username;
 	private Keyboard keyboard;
-	public Sprite sprite;
 	
 	private boolean moving = false;
 	
