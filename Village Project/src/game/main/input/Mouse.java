@@ -36,7 +36,8 @@ public class Mouse implements MouseListener, MouseMotionListener { //ok that's 2
 
 	@Override
 	public void mouseDragged(MouseEvent e) { //ew no one cares
-		// TODO Auto-generated method stub 
+		x = e.getX(); //set x to the mouse's x position
+		y = e.getY(); //set y to the mouse's y posiiton
 	}
 
 	@Override

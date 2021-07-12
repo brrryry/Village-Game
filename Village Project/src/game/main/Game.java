@@ -8,12 +8,13 @@ import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.io.IOException;
-import java.net.URLClassLoader;
+import java.util.Random;
 
-import javax.print.DocFlavor.URL;
 import javax.swing.JFrame;
 
+import game.main.entity.mob.Mob;
 import game.main.entity.mob.Player;
+import game.main.entity.mob.TestMob;
 import game.main.graphics.Window;
 import game.main.graphics.sprite.Sprite;
 import game.main.input.Keyboard;
@@ -23,9 +24,7 @@ import game.main.map.Map;
 public class Game extends Canvas implements Runnable { //making a class
 
 	public static final String TITLE = "Village Game"; //title
-	
 	//setting dimensions
-	
 	/*
 	 * We use a scale so that we can change screen size later!
 	 */
@@ -33,12 +32,14 @@ public class Game extends Canvas implements Runnable { //making a class
 	public static final int HEIGHT = WIDTH * 9 / 16;
 	public static final int SCALE = 4;
 	
+	
 	public static final int UPS = 60;
 	public static final int FPS = 120;
 	
 	//creating Java Components
 	private JFrame frame; //This is the "frame", or the "window" of the screen
 	private Thread thread; //This is a process.
+	
 	private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB); //This is an image that we'll be drawing onto the JFrame!
 	private int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData(); //this is the array of pixels that will be shown on the screen
 	
@@ -54,7 +55,7 @@ public class Game extends Canvas implements Runnable { //making a class
 	public Game() { //constructor!
 		frame = new JFrame(TITLE); //init the JFrame
 		Dimension res = new Dimension(WIDTH * SCALE, HEIGHT * SCALE); //create a new Dimension named res to set screen size
-		
+				
 		map = new Map();
 		
 		//setting screen size
@@ -70,8 +71,12 @@ public class Game extends Canvas implements Runnable { //making a class
 		keyboard = new Keyboard();
 		mouse = new Mouse();
 		
-		player = new Player("Bryan", 0, 0, Sprite.testPlayer, map, keyboard);
+		player = new Player("YouLikeCats", 0, 0, Sprite.testPlayer, map, keyboard, mouse);
 		
+		for(int i = 0; i < 10; i++) {
+			map.add(new TestMob(0, 0, Sprite.testPlayer, map));
+		}
+
 		//adding the input components to the object (Game)
 		addKeyListener(keyboard);
 		addMouseListener(mouse);
@@ -122,7 +127,7 @@ public class Game extends Canvas implements Runnable { //making a class
 		        }
 
 		        if (System.currentTimeMillis() - timer > 1000) {
-		            frame.setTitle(TITLE + " | " + String.format("UPS: %s, FPS: %s", ticks, frames));
+		            //frame.setTitle(TITLE + " | " + String.format("UPS: %s, FPS: %s", ticks, frames));
 		       
 		            frames = 0;
 		            ticks = 0;
@@ -135,7 +140,7 @@ public class Game extends Canvas implements Runnable { //making a class
 	
 	public void update() { //update components (keybaord input, mouse input, etcetc)
 		keyboard.update();
-		player.update();
+		map.update();
 	}
 	
 	public void render() { //render componenets
@@ -155,7 +160,6 @@ public class Game extends Canvas implements Runnable { //making a class
 		//set screen pixels to actual pixel array
 		window.setOffset(player.getX() - window.width / 2, player.getY() - window.height / 2);
 		window.render(map); //calls the render method
-		window.renderPlayer(player);
 		for(int i = 0; i < pixels.length; i++) pixels[i] = window.pixels[i]; //sets stuff
 		
 		

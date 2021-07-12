@@ -26,8 +26,8 @@ public class Spritesheet {
 	
 	private void loadSheet() {
 		try {
-			Path testpath = Paths.get(filepath);
-			System.out.println(testpath.toAbsolutePath());
+			//Path testpath = Paths.get(filepath);
+			//System.out.println(testpath.toAbsolutePath());
 			BufferedImage image = ImageIO.read(getClass().getResource(filepath)); //get bufferedimage
 			System.out.println("Loading Spritesheet at " + filepath + " successfully");
 			width = image.getWidth(); //set the width

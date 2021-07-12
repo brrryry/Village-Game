@@ -24,6 +24,7 @@ public class Keyboard implements KeyListener { //yay! interfaces!
 	@Override
 	public void keyPressed(KeyEvent e) { //WHEN A KEY IS PRESSED
 		keys[e.getKeyCode()] = true; //set the boolean of that key index to true
+		//System.out.println(e.getKeyCode());
 	}
 
 	@Override

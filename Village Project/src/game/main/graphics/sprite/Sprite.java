@@ -12,6 +12,7 @@ public class Sprite {
 	public static Sprite dirt1 = new Sprite(0, 0, 16, 0, Spritesheet.tiles1);
 	public static Sprite debug1 = new Sprite(1, 0, 16, 0, Spritesheet.tiles1);
 	public static Sprite testPlayer = new Sprite(2, 0, 16, 3, Spritesheet.tiles1);
+	public static Sprite blackSprite = new Sprite(3, 0, 16, 0, Spritesheet.tiles1);
 	
 	public Sprite(int x, int y, int size, int bound, Spritesheet sheet) {
 		pixels = new int[size * size];
@@ -23,7 +24,6 @@ public class Sprite {
 		for(int yy = 0; yy < size; yy++) {
 			for(int xx = 0; xx < size; xx++) {
 				pixels[xx + yy * size] = sheet.pixels[(x + xx) + (y + yy) * sheet.getWidth()];
-				//System.out.println(sheet.pixels[(x + xx) + (y + yy) * sheet.getWidth()]);
 			}
 		}
 	}

@@ -1,13 +1,12 @@
 package game.main.entity.mob;
 
-import java.util.Objects;
-
 import game.main.entity.Entity;
-import game.main.graphics.sprite.Sprite;
+import game.main.entity.dropper.Dropper;
 import game.main.map.Map;
+import game.main.tile.Tile;
 
 public abstract class Mob extends Entity {
-
+	
 	protected int walkspeed; //mob walkspeed
 	protected int x, y; //mob coordinates (pixels)
 	protected int health; //mob health
@@ -16,9 +15,9 @@ public abstract class Mob extends Entity {
 		UP, DOWN, LEFT, RIGHT
 	}
 	
-	protected Direction mobdir;
+	protected Direction mobdir; //give the mob a direction
 	
-	public void move(int xmove, int ymove) {
+	public void move(int xmove, int ymove) { //move method, move mob a certain direction
 		if(xmove != 0 && ymove != 0) {
 			move(xmove, 0);
 			move(0, ymove);
@@ -40,6 +39,7 @@ public abstract class Mob extends Entity {
 		if(y < (this.sprite.getBound() * -1)) y = this.sprite.getBound() * -1 - 1;
 		if(x + 16 - this.sprite.getBound() >= Map.MAPSIZE * 16) x = Map.MAPSIZE * 16 - 15 + this.sprite.getBound();
 		if(y + 16 - this.sprite.getBound() >= Map.MAPSIZE * 16) y = Map.MAPSIZE * 16 - 15 + this.sprite.getBound();
+		return;
 	}
 	
 	public int abs(int value) {
@@ -49,9 +49,9 @@ public abstract class Mob extends Entity {
 	
 	public boolean collision(int xmove, int ymove) {
 		
-		int leftbound = x + this.sprite.getBound();
+		int leftbound = x + this.sprite.getBound() - 1;
 		int rightbound = x + 16 - this.sprite.getBound();
-		int upbound = y + this.sprite.getBound();
+		int upbound = y + this.sprite.getBound() - 1;
 		int downbound = y + 16 - this.sprite.getBound();
 		
 		for(int pixelnum = this.sprite.getBound() + 1; pixelnum < 15 - this.sprite.getBound(); pixelnum++) {
@@ -62,6 +62,17 @@ public abstract class Mob extends Entity {
 		}
 		
 		return false;
+	}
+	
+	public void placeTile(Tile tile, int tilex, int tiley) {
+		this.map.setTile(tile, tilex, tiley);
+	}
+	
+	public void placeDropper(Dropper dropper) {
+		int dropperTileX = dropper.getX() / 16;
+		int dropperTileY = dropper.getY() / 16;
+		if(dropperTileX >= 0 && dropperTileX < this.map.mapTiles.length && dropperTileY >= 0 && dropperTileY < this.map.mapTiles.length)
+		this.map.add(dropper);
 	}
 	
 	public abstract void update();
