@@ -4,192 +4,338 @@ import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Random;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import javax.swing.JFrame;
 
-import game.main.entity.mob.Mob;
+import game.main.entity.Inventory;
 import game.main.entity.mob.Player;
-import game.main.entity.mob.TestMob;
 import game.main.graphics.Window;
 import game.main.graphics.sprite.Sprite;
+import game.main.graphics.ui.UI;
 import game.main.input.Keyboard;
 import game.main.input.Mouse;
 import game.main.map.Map;
 
-public class Game extends Canvas implements Runnable { //making a class
+/**
+ * The Game Class is used as the main class that starts the game. This class contains the start/stop methods for the main thread as well as the universal run/update/render methods.
+ * 
+ * @author bryan.chan
+ * @version 0.0.1
+ *
+ */
 
-	public static final String TITLE = "Village Game"; //title
-	//setting dimensions
-	/*
-	 * We use a scale so that we can change screen size later!
-	 */
+public class Game extends Canvas implements Runnable { //making a class
+	
+	//Name and Dimensions
+	public static final String TITLE = "Village Game";
 	public static final int WIDTH = 400;
 	public static final int HEIGHT = WIDTH * 9 / 16;
 	public static final int SCALE = 4;
 	
-	
+	//Updates/Frames
 	public static final int UPS = 60;
-	public static final int FPS = 120;
+	public static final int FPS = 60;
 	
-	//creating Java Components
-	private JFrame frame; //This is the "frame", or the "window" of the screen
-	private Thread thread; //This is a process.
+
+	//Runtime Statistic Report
+	public static final boolean REPORTFILE = true; //should we have a report file?
 	
+	private static File reportFile;
+	private static double minRuntime = Double.MAX_VALUE;
+	private static double maxRuntime = 0;
+	public static int lss = 0; //loops since start
+	public static double loopTime = 0; //amount of time it takes
+	
+	//Container and Thread
+	private JFrame frame;
+	private Thread thread;
+	
+	//Image and Pixel Array of said image
 	private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB); //This is an image that we'll be drawing onto the JFrame!
-	private int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData(); //this is the array of pixels that will be shown on the screen
+	private int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
 	
-	//custom class components
+	//Custom Class Components
 	private Window window;
-	private Map map; //create a new map (current map that the player is on)
-	private Keyboard keyboard; //This is a keyboard (CTRL + Click "Keyboard" for reference)
-	private Mouse mouse; //This is a mouse (CTRL + Click "Mouse" for reference)
+	private Map map;
+	private Keyboard keyboard;
+	private Mouse mouse;
 	private Player player;
+	private UI ui;
 	
-	private boolean running = false; //This keeps track of whether the game is running or not
+	//Game Status
+	private boolean running = false;
 	
-	public Game() { //constructor!
-		frame = new JFrame(TITLE); //init the JFrame
-		Dimension res = new Dimension(WIDTH * SCALE, HEIGHT * SCALE); //create a new Dimension named res to set screen size
-				
-		map = new Map();
+	
+	//Constructor
+	public Game() throws IOException { 
 		
-		//setting screen size
+		//JFrame Creation
+		frame = new JFrame(TITLE);
+		Dimension res = new Dimension(WIDTH * SCALE, HEIGHT * SCALE);
+		
+		//Screen Size
 		frame.setMinimumSize(res);
 		frame.setPreferredSize(res);
 		frame.setMaximumSize(res);
 		frame.setResizable(false); //changing this later obviously
 		
-		//create window
-		window = new Window(WIDTH, HEIGHT);
+		//Initialize Resources
+		Sprite.initialize();
 		
-		//init keyboard and mouse (again, go check the classes for reference)
+		//Initialize Components
+		map = new Map();
+		window = new Window(WIDTH, HEIGHT);
 		keyboard = new Keyboard();
 		mouse = new Mouse();
 		
-		player = new Player("YouLikeCats", 0, 0, Sprite.testPlayer, map, keyboard, mouse);
-		
-		for(int i = 0; i < 10; i++) {
-			map.add(new TestMob(0, 0, Sprite.testPlayer, map));
-		}
-
-		//adding the input components to the object (Game)
 		addKeyListener(keyboard);
 		addMouseListener(mouse);
 		addMouseMotionListener(mouse);
+	
+				
+		
+		//Load/Build Player and UI 
+		Inventory i = new Inventory();
+		i.add(1000, 10001);
+		i.add(1000, 0);
+		
+		player = new Player("YouLikeCats", 0, 0, Sprite.testPlayer, map, keyboard, mouse, i);
+		
+		ui = new UI(player, map);
+		
+		//Report File
+		if(REPORTFILE) reportFile = getReportFile();
+		
 	}
 	
-	public synchronized void start() { //start method (called whenever we do Game.start())
-		thread = new Thread(this); //init thread
-		running = true; //we are running!
-		thread.start(); //start the thread process (continuously loops the run method because of the "Runnable" implementation)
+	/**
+	 * This method initializes and starts a thread.
+	 * @param Nothing
+	 * @return Nothing
+	 */
+	public synchronized void start() {
+		thread = new Thread(this); //"this" allows us to use the run method in this class
+		running = true;
+		thread.start();
 	}
 	
-	public synchronized void stop() { //stop method
-		running = false; //we are NOT running!
+	/**
+	 * This method stops the thread and ends the game.
+	 * @param Nothing
+	 * @return Nothing
+	 */
+	public synchronized void stop() {
+		running = false;
+		
 		try {
-			thread.join(); //yeet the threads
-		} catch (Exception e) { //if there's an exception print it out
-			e.printStackTrace();
+			thread.join();
+		} catch (Exception e) { 
+			e.printStackTrace(); 
 		}
 	}
 	
+	/**
+	 * This method is called whenever the thread starts.
+	 * @param Nothing
+	 * @return Nothing
+	 */
 	public void run() {
-
+		
+		//Initialize Variables
 		long initialTime = System.nanoTime();
 		final double timeU = 1000000000 / UPS;
 		final double timeF = 1000000000 / FPS;
 		double deltaU = 0, deltaF = 0;
 		int frames = 0, ticks = 0;
 		long timer = System.currentTimeMillis();
+		
+		//This while loop continues until the game is closed
+		while (running) {
+	        long currentTime = System.nanoTime();
+	        deltaU += (currentTime - initialTime) / timeU;
+	        deltaF += (currentTime - initialTime) / timeF;
+	        initialTime = currentTime;
+	        if (deltaU >= 1) {
+	            update();
+	            ticks++;
+	            deltaU--;
+	        }
 
-		    while (running) {
-
-		        long currentTime = System.nanoTime();
-		        deltaU += (currentTime - initialTime) / timeU;
-		        deltaF += (currentTime - initialTime) / timeF;
-		        initialTime = currentTime;
-
-		        if (deltaU >= 1) {
-		            update();
-		            ticks++;
-		            deltaU--;
-		        }
-
-		        if (deltaF >= 1) {
-		            render();
-		            frames++;
-		            deltaF--;
-		        }
-
-		        if (System.currentTimeMillis() - timer > 1000) {
-		            //frame.setTitle(TITLE + " | " + String.format("UPS: %s, FPS: %s", ticks, frames));
-		       
-		            frames = 0;
-		            ticks = 0;
-		            timer += 1000;
-		        }
+	        if (deltaF >= 1) {
+	        	render();
+		        frames++;
+		        deltaF--;
 		    }
+
+		    if (System.currentTimeMillis() - timer > 1000) {
+		    	frame.setTitle(TITLE + " | " + String.format("UPS: %s, FPS: %s", ticks, frames));
+		        requestFocus();
+		        frames = 0;
+		        ticks = 0;
+		        timer += 1000;
+		    }
+		    
+		    //Edit Runtime Statistics
+		    long endTime = System.nanoTime();
+			double runTime = (endTime - currentTime) / 1e6;
+			if(runTime > Game.maxRuntime) Game.maxRuntime = runTime;
+			if(runTime < Game.minRuntime) Game.minRuntime = runTime;
+			loopTime = (loopTime + runTime) / 2;
 		}
+	}
+	
+	/**
+	 * This method is called when exiting the game.
+	 * @param Nothing
+	 * @return Nothing
+	 * @throws FileNotFoundException
+	 * @see FileNotFoundException
+	 */
+	public static void exit() throws FileNotFoundException {
+		if(REPORTFILE) saveReportFile(reportFile);
+		System.exit(0);
+	}
 	
 
-	
-	public void update() { //update components (keybaord input, mouse input, etcetc)
+	/**
+	 * This method is used as a universal update method for the game.
+	 * @param Nothing
+	 * @return Nothing
+	 */
+	public void update() {
 		keyboard.update();
 		map.update();
 	}
 	
-	public void render() { //render componenets
-		BufferStrategy bs = getBufferStrategy(); //BufferStrategy = a strategy to render images
-		if(bs == null) { //if it doesn't exist
-			createBufferStrategy(3); //create 3 "spots" or "backup images". 
+	/**
+	 * This method is used as a universal render method for the game.
+	 * @param Nothing
+	 * @return Nothing
+	 */
+	public void render() {
+		//Buffer Strategy
+		BufferStrategy bs = getBufferStrategy();
+		if(bs == null) {
+			createBufferStrategy(3);
 			return;
 		}
 		
-		/*
-		 * BufferStrategy is used to have images layed out back-to-back so that there is no lag. This way, when an image is loaded,
-		 * the next image is already up for preperation.
-		 */
-		
+		//Manipulate Window
 		window.clear();
-		
-		//set screen pixels to actual pixel array
 		window.setOffset(player.getX() - window.width / 2, player.getY() - window.height / 2);
-		window.render(map); //calls the render method
-		for(int i = 0; i < pixels.length; i++) pixels[i] = window.pixels[i]; //sets stuff
+		window.render(map, ui);
+		for(int i = 0; i < pixels.length; i++) pixels[i] = window.pixels[i];
 		
+		//Graphics Drawing
+		Graphics g = bs.getDrawGraphics();
+		g.setColor(Color.blue);
+		g.fillRect(0, 0, WIDTH * SCALE, HEIGHT * SCALE);
+		g.drawImage(image, 0, 0, WIDTH * SCALE, HEIGHT * SCALE, null); //Draw Game Image
 		
-		Graphics g = bs.getDrawGraphics(); //graphics of the BufferStrategy
-		
-	
-		g.setColor(Color.blue); //set the drawing color to black
-		g.fillRect(0, 0, WIDTH * SCALE, HEIGHT * SCALE); //BIG RECTANGLE BOIS
-		g.drawImage(image, 0, 0, WIDTH * SCALE, HEIGHT * SCALE, null); //DRAW IMAGE BOIS (this draws the game)
-		
-		g.dispose(); //yeet graphics
-		bs.show(); //present the image to the screen
+		//Image Presentation
+		g.dispose();
+		bs.show();
 		
 	}
 	
-	public void setMap(Map m) { //possibly setting a new map?
-		this.map = m; //this initializes the map to the new map that is being set
+	/**
+	 * This method creates a file using the UUID of the client computer that will be used to store Runtime Statistics of the game experience.
+	 * @param Nothing
+	 * @return A file to store Runtime Statistics
+	 * @throws IOException
+	 * @see IOException
+	 */
+	public static File getReportFile() throws IOException {
+		//Get Computer UUID
+		final Process p = Runtime.getRuntime().exec("wmic csproduct get UUID");
+		BufferedReader output = new BufferedReader(new InputStreamReader(p.getInputStream()));
+		String line;
+		
+		while((line = output.readLine()) != null) {
+			line = line.trim();
+			
+			//this "if" statement is used because of the way that the BufferedReader takes in the output.
+			if(line.length() > 4) {
+				break;
+			}
+		}
+		
+		//Create File Name
+		String filePath = "./res/reports/" + line + "-0.txt";
+		int id = 0;
+		
+		boolean notFound = false;
+		File file = new File(filePath);
+		
+		while(!notFound) {
+			file = new File(filePath);
+			if(file.exists()) {
+				filePath = filePath.substring(0, filePath.length() - 4 - Integer.toString(id).length());
+				id++;
+				filePath += id + ".txt";
+			} else notFound = true;
+		}
+		
+		
+		file.createNewFile();
+		return file;
 	}
 	
+	/**
+	 * This method writes the Runtime Statistics to the report file.
+	 * @param File used to write statistics
+	 * @return Nothing
+	 * @throws FileNotFoundException
+	 * @see FileNotFoundException
+	 */
+	public static void saveReportFile(File f) throws FileNotFoundException {
+		PrintWriter pw = new PrintWriter(f);
+		pw.println("Minimum Run Time: " + minRuntime + "ms");
+		pw.println("Maximum Run Time: " + maxRuntime + "ms");
+		pw.println("Average Run Time: " + loopTime + "ms");
+		pw.close();
+	}
+	
+	/**
+	 * This method is the main method. This is used to create the instance of the game that the user will use to play.
+	 * @param args (unused)
+	 * @return Nothing
+	 * @throws IOException
+	 */
 	public static void main(String[] args) throws IOException { //main method
+		Game game = new Game();
+		game.frame.setLocationRelativeTo(null);
+		game.frame.add(game); 
+		game.frame.pack();
 		
-		Game game = new Game(); //new object!
-		game.frame.setLocationRelativeTo(null); //center screen
-		game.frame.add(game); //add game component
-		game.frame.pack(); //idek what this does
-		game.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //sets the "x" button
-		game.frame.setVisible(true); //makes the frame, ya'know, VISIBLE
-		game.start(); //start method!
+		//This lets the exit method work at the end of the game.
+		game.frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		game.frame.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				try {
+					exit();
+				} catch (FileNotFoundException e1) {
+					e1.printStackTrace();
+				}
+			}
+		});
 		
 		
+		game.frame.setVisible(true);
+		game.start(); 
 	}
 	
 }
