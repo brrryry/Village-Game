@@ -15,6 +15,8 @@ public class Spritesheet {
 	
 
 	public static Spritesheet tiles1 = new Spritesheet("/Sprites/tiles/tiles1.png", 256, 256);
+	public static Spritesheet conveyors = new Spritesheet("/Sprites/tiles/conveyors.png", 256, 256);
+	public static Spritesheet ui = new Spritesheet("/Sprites/tiles/ui.png", 512, 512);
 	
 	public Spritesheet(String filepath, int width, int height) {
 		this.filepath = filepath;

@@ -1,0 +1,3 @@
+Minimum Run Time: 0.0ms
+Maximum Run Time: 31.7908ms
+Average Run Time: 5.2054794520547945E-5ms

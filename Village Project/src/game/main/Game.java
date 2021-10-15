@@ -43,7 +43,7 @@ public class Game extends Canvas implements Runnable { //making a class
 	public static final String TITLE = "Village Game";
 	public static final int WIDTH = 400;
 	public static final int HEIGHT = WIDTH * 9 / 16;
-	public static final int SCALE = 4;
+	public static final int SCALE = 2;
 	
 	//Updates/Frames
 	public static final int UPS = 60;
@@ -115,6 +115,8 @@ public class Game extends Canvas implements Runnable { //making a class
 		player = new Player("YouLikeCats", 0, 0, Sprite.testPlayer, map, keyboard, mouse, i);
 		
 		ui = new UI(player, map);
+		
+		System.out.println(Game.SCALE);
 		
 		//Report File
 		if(REPORTFILE) reportFile = getReportFile();

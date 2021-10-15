@@ -5,6 +5,8 @@ import game.main.map.Map;
 
 public class Entity {
 
+	protected String name;
+	protected int id;
 	protected int x; //entity's absolute x position
 	protected int y; //entity's absolute y position
 	private boolean removed; //tells us if the entity has been removed from the level or not
@@ -20,6 +22,18 @@ public class Entity {
 	
 	public Entity() { //empty constructor for extension
 		
+	}
+	
+	public void setID(int i) {
+		this.id = i;
+	}
+	
+	public int getID() {
+		return id;
+	}
+	
+	public String getName() {
+		return name;
 	}
 	
 	public void setMap(Map map) { //move the entity to another map?

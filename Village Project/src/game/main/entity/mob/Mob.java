@@ -1,6 +1,7 @@
 package game.main.entity.mob;
 
 import game.main.entity.Entity;
+import game.main.entity.conveyor.Conveyor;
 import game.main.entity.dropper.Dropper;
 import game.main.map.Map;
 import game.main.tile.Tile;
@@ -73,6 +74,17 @@ public abstract class Mob extends Entity {
 		int dropperTileY = dropper.getY() / 16;
 		if(dropperTileX >= 0 && dropperTileX < this.map.mapTiles.length && dropperTileY >= 0 && dropperTileY < this.map.mapTiles.length)
 		this.map.add(dropper);
+		
+		
+		
+	}
+	
+	public void placeConveyor(Conveyor c) {
+		int conveyorTileX = c.getX() / 16;
+		int conveyorTileY = c.getY() / 16;
+		if(conveyorTileX >= 0 && conveyorTileX < this.map.mapTiles.length && conveyorTileY >= 0 && conveyorTileY < this.map.mapTiles.length)
+		this.map.add(c);
+		
 	}
 	
 	public abstract void update();

@@ -7,6 +7,7 @@ public class Keyboard implements KeyListener { //yay! interfaces!
 
 	private boolean[] keys = new boolean[120]; //this'll keep track of what keys are pressed
 	public boolean up, down, left, right; //tells us if any important keys are pressed
+	public boolean r;
 	
 	public void update() { //this is called in the main update method 60 times per second
 		//update the boolean values (KeyEvent.VK_W is basically the ASCII value)
@@ -14,6 +15,8 @@ public class Keyboard implements KeyListener { //yay! interfaces!
 		left = keys[KeyEvent.VK_A];
 		down = keys[KeyEvent.VK_S];
 		right = keys[KeyEvent.VK_D];
+		
+		r = keys[KeyEvent.VK_R];
 	}
 	
 	@Override

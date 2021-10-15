@@ -3,17 +3,17 @@ package game.main.entity.conveyor;
 import game.main.graphics.sprite.Sprite;
 import game.main.map.Map;
 
-public class BasicConveyor extends Conveyor {
+public class LongConveyor extends Conveyor {
 
 	private String name = "Basic Conveyor";
-	private int id = 10000;
+	private int id = 10001;
 	
 	private int speed = 2;
 	private int xLength = 16;
-	private int yLength = 16;
-	public Sprite sprite = Sprite.basicConveyor;
+	private int yLength = 32;
+	public Sprite sprite = Sprite.longConveyor;
 	
-	public BasicConveyor(int x, int y, int direction, Map map) {
+	public LongConveyor(int x, int y, int direction, Map map) {
 		super(x, y, direction, map);
 		this.setSpeed(speed);
 		this.setID(id);
